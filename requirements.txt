@@ -1,0 +1,6 @@
+PyGithub==1.21.0
+argparse==1.2.1
+astroid==1.0.1
+distribute==0.6.24
+logilab-common==0.60.0
+pylint==1.0.0
