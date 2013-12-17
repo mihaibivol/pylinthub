@@ -45,6 +45,17 @@ class GithubPullReviewClient(object):
             return comment
         return None
 
+    def get_changed_files(self):
+        """Returns the files added or chaned in the pull request"""
+        filenames = set()
+        for commit in self.pull_request.get_commits():
+            files = commit.files
+            changed = [f.filename for f in files if f.status != 'deleted']
+            removed = [f.filename for f in files if f.status == 'deleted']
+            filenames = filenames.union(changed).difference(removed)
+
+        return filenames
+
     def get_review_comment(self, code_context, filename):
         """Get a Review Comment that matches the given code context
         :param code_context: string
