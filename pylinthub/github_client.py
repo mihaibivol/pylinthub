@@ -87,7 +87,7 @@ class GithubPullReviewClient(object):
 
             if line == code_context:
                 # Comment will be below code_context
-                return index + 1
+                return index
 
         return -1
 
