@@ -50,11 +50,11 @@ class GithubPullReviewClient(object):
         filenames = set()
         for commit in self.pull_request.get_commits():
             files = commit.files
-            changed = [f.filename for f in files if f.status != 'deleted']
-            removed = [f.filename for f in files if f.status == 'deleted']
+            changed = [f.filename for f in files if f.status != 'removed']
+            removed = [f.filename for f in files if f.status == 'removed']
             filenames = filenames.union(changed).difference(removed)
 
-        return filenames
+        return list(filenames)
 
     def get_review_comment(self, code_context, filename):
         """Get a Review Comment that matches the given code context
