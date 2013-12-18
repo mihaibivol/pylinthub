@@ -24,6 +24,12 @@ class PylintWriteHandler(object):
 
         path, line, body = string.split(":")
         context = linecache.getline(path, int(line)).strip()
+        comments = self.github.get_review_comments(context, path)
+
+        #If already commented don't comment again
+        if body in [c.body for c in comments]:
+            return
+
         self.github.create_review_comment(context, path, body)
 
 def review_pull_request(repository, pull_request, **credentials):

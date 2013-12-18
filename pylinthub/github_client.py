@@ -56,23 +56,15 @@ class GithubPullReviewClient(object):
 
         return list(filenames)
 
-    def get_review_comment(self, code_context, filename):
-        """Get a Review Comment that matches the given code context
+    def get_review_comments(self, code_context, filename):
+        """Get the review comments that match the given code context
         :param code_context: string
         :param filename: string
         :rtype: github.PullRequestComment.PullRequestComment
         """
-        for comment in self.pull_request.get_review_comment:
-            if comment.path != filename:
-                continue
-
-            position = self._get_comment_position(comment.diff_hunk,
-                                                  code_context)
-
-            if position != -1:
-                return comment
-
-        return None
+        return [c for c in self.pull_request.get_review_comments()
+                if c.path == filename and
+                self._get_comment_position(c.diff_hunk, code_context) != -1]
 
     def _get_comment_position(self, patch, code_context):
         """Return the position in the commit for the given code_context
