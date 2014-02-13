@@ -45,6 +45,20 @@ class GithubPullReviewClient(object):
             return comment
         return None
 
+    def create_or_update_comment(self, comment_header, body):
+        """Creates a comment or updates a pull request comment that
+        begins with comment_header
+        :param comment_header: header to match for the edited comment
+        :param body: body of the new comment
+        """
+
+        for comment in self.pull_request.get_issue_comments():
+            if comment.body.startswith(comment_header):
+                comment.edit(body)
+                break
+        else:
+            self.pull_request.create_issue_comment(body)
+
     def get_changed_files(self):
         """Returns the files added or chaned in the pull request"""
         filenames = set()

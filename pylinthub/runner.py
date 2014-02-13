@@ -10,10 +10,15 @@ from pylinthub.github_client import GithubPullReviewClient
 PYLINT_ARGS = ["-r", "n",
                "--msg-template='{path}:{line}:{msg}'"]
 
-class PylintWriteHandler(object):
-    """Used as TextReporter for parsing output lines from running pylint."""
+class GithubWriter(object):
+    """Abstract class used for adding side effects when parsing pylint
+    output."""
+
     def __init__(self, github):
         self.github = github
+
+    def handle_pylint_error(self, path, line, code, message):
+        raise NotImplementedError
 
     def write(self, string):
         """Write wrapper"""
@@ -22,17 +27,64 @@ class PylintWriteHandler(object):
         if string == "" or string.startswith("****"):
             return
 
-        path, line, body = string.split(":")
-        context = linecache.getline(path, int(line)).strip()
-        comments = self.github.get_review_comments(context, path)
+        path, line, message = string.split(":")
+        code = linecache.getline(path, int(line)).strip()
+        self.handle_pylint_error(path, line, code, message)
+
+    def flush(self):
+        raise NotImplementedError
+
+class GithubInlineWriter(GithubWriter):
+    """Writes inline comments with the pylint errors found in the analyzed
+    files"""
+
+    def handle_pylint_error(self, path, line, code, message):
+        """Post inline message on the pull request"""
+
+        comments = self.github.get_review_comments(code, path)
 
         #If already commented don't comment again
-        if body in [c.body for c in comments]:
+        if message in [c.body for c in comments]:
             return
 
-        self.github.create_review_comment(context, path, body)
+        self.github.create_review_comment(code, path, message)
 
-def review_pull_request(repository, pull_request, **credentials):
+    def flush(self):
+        pass
+
+class GithubCommentWriter(GithubWriter):
+    """Edits a static comment in the GitHub Pull Request"""
+    COMMENT_HEADER = "Linter Errors:"
+
+    def __init__(self, github):
+        self.github = github
+        self.file_line_code = {}
+        self.file_line_messages = {}
+
+    def handle_pylint_error(self, path, line, code, message):
+        file_line_key = '%s:%s' % (path, line)
+
+        self.file_line_code[file_line_key] = code
+        messages = self.file_line_messages.get(file_line_key, [])
+        messages.append(message)
+        self.file_line_messages[file_line_key] = messages
+
+    def flush(self):
+        body = self.COMMENT_HEADER + '\n'
+
+        ## Have keys sorted so the comments are in the correct order
+        for file_line in sorted(self.file_line_messages.keys()):
+            body += 'In %s:\n' % file_line
+            body += '```python\n%s\n```\n' % self.file_line_code[file_line]
+
+            for message in self.file_line_messages[file_line]:
+                body += '  * %s\n' % message
+
+            body += '\n'
+
+        self.github.create_or_update_comment(self.COMMENT_HEADER, body)
+
+def review_pull_request(repository, pull_request, inline=True, **credentials):
     """Creates inline comments on the given pull request with the
     errors given by pylint"""
     github = GithubPullReviewClient(repository, pull_request, **credentials)
@@ -40,6 +92,7 @@ def review_pull_request(repository, pull_request, **credentials):
     files = github.get_changed_files()
     files = [f for f in files if f.endswith(".py")]
 
-    handler = PylintWriteHandler(github)
+    handler = GithubCommentWriter(github)
     lint.Run(PYLINT_ARGS + files, reporter=TextReporter(handler), exit=False)
+    handler.flush()
 
