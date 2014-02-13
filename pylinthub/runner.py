@@ -84,7 +84,7 @@ class GithubCommentWriter(GithubWriter):
 
         self.github.create_or_update_comment(self.COMMENT_HEADER, body)
 
-def review_pull_request(repository, pull_request, inline=True, **credentials):
+def review_pull_request(repository, pull_request, inline=False, **credentials):
     """Creates inline comments on the given pull request with the
     errors given by pylint"""
     github = GithubPullReviewClient(repository, pull_request, **credentials)
@@ -92,7 +92,8 @@ def review_pull_request(repository, pull_request, inline=True, **credentials):
     files = github.get_changed_files()
     files = [f for f in files if f.endswith(".py")]
 
-    handler = GithubCommentWriter(github)
+    handler = GithubInlineWriter(github) if inline else GithubCommentWriter(github)
+
     lint.Run(PYLINT_ARGS + files, reporter=TextReporter(handler), exit=False)
     handler.flush()
 
