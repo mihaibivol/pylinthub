@@ -18,6 +18,8 @@ class GithubWriter(object):
         self.github = github
 
     def handle_pylint_error(self, path, line, code, message):
+        """Implement this to add side effect when encountering an error
+        """
         raise NotImplementedError
 
     def write(self, string):
@@ -32,6 +34,8 @@ class GithubWriter(object):
         self.handle_pylint_error(path, line, code, message)
 
     def flush(self):
+        """Implement this to add the final side effect, after passing
+        through the whole error report."""
         raise NotImplementedError
 
 class GithubInlineWriter(GithubWriter):
@@ -62,6 +66,7 @@ class GithubCommentWriter(GithubWriter):
         self.file_line_messages = {}
 
     def handle_pylint_error(self, path, line, code, message):
+        """Appends errors to local structures"""
         file_line_key = '%s:%s' % (path, line)
 
         self.file_line_code[file_line_key] = code
@@ -70,6 +75,7 @@ class GithubCommentWriter(GithubWriter):
         self.file_line_messages[file_line_key] = messages
 
     def flush(self):
+        """Creates a github comment with the errors found in the file"""
         body = self.COMMENT_HEADER + '\n'
 
         ## Have keys sorted so the comments are in the correct order
