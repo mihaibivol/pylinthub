@@ -5,7 +5,7 @@ from credentials import credentials
 
 USAGE = "%s repo pull_request_number"
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) != 3:
         print USAGE % sys.argv[0]
         sys.exit(1)
@@ -14,3 +14,7 @@ if __name__ == "__main__":
     pull_number = int(sys.argv[2])
 
     review_pull_request(repo, pull_number, **credentials)
+
+if __name__ == "__main__":
+    main()
+
