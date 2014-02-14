@@ -57,7 +57,7 @@ class GithubCommentWriter(GithubWriter):
     COMMENT_HEADER = "Linter Errors:"
 
     def __init__(self, github):
-        self.github = github
+        super(GithubCommentWriter, self).__init__(github)
         self.file_line_code = {}
         self.file_line_messages = {}
 
