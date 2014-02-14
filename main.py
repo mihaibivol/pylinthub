@@ -4,7 +4,7 @@ import sys
 from pylinthub.runner import review_pull_request
 from credentials import credentials
 
-USAGE = "%s repo pull_request_number"
+USAGE = "%s repo pull_request_number [pylint_rc_file]"
 
 def main():
     """Reviews a pull request with the given system arguments"""
