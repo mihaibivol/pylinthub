@@ -1,3 +1,4 @@
+"""Entrypoint for running the notification script"""
 import sys
 
 from pylinthub.runner import review_pull_request
