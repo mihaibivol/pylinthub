@@ -64,9 +64,25 @@ class GithubCommentWriter(GithubWriter):
         super(GithubCommentWriter, self).__init__(github)
         self.file_line_code = {}
         self.file_line_messages = {}
+        self.candidates = set()
+        self._add_candidate_lines()
+
+    def _add_candidate_lines(self):
+        """Creates a cache with the code lines that are candidates for
+        errors in the pull request."""
+        for f in self.github.get_files():
+            for line in f.patch.splitlines():
+                line = line.lstrip('+')
+                self.candidates.add(line)
 
     def handle_pylint_error(self, path, line, code, message):
         """Appends errors to local structures"""
+
+        # We don't want to receive verbose messages with errors that weren't
+        #added in the current pull request
+        if code not in self.candidates:
+            return
+
         file_line_key = '%s:%s' % (path, line)
 
         self.file_line_code[file_line_key] = code

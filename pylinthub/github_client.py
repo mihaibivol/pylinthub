@@ -33,13 +33,13 @@ class GithubPullReviewClient(object):
 
             file_index = filenames.index(filename)
             patch = commit.files[file_index].patch
-            
+
             position = self._get_comment_position(patch, code_context)
 
             if position == -1:
                 continue
 
-            comment = self.pull_request.create_review_comment(body, commit, 
+            comment = self.pull_request.create_review_comment(body, commit,
                                                               filename,
                                                               position)
             return comment
@@ -58,6 +58,10 @@ class GithubPullReviewClient(object):
                 break
         else:
             self.pull_request.create_issue_comment(body)
+
+    def get_files(self):
+        """Returns the files from the current Pull Request"""
+        return [f for f in self.pull_request.get_files()]
 
     def get_changed_files(self):
         """Returns the files added or chaned in the pull request"""
