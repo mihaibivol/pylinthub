@@ -56,14 +56,23 @@ class GithubInlineWriter(GithubWriter):
     def flush(self):
         pass
 
+class Violation(object):
+    """Class used in representing a style violation."""
+
+    def __init__(self, path, url, line, code, message):
+        self.path = path
+        self.url = url
+        self.line = line
+        self.code = code
+        self.message = message
+
 class GithubCommentWriter(GithubWriter):
     """Edits a static comment in the GitHub Pull Request"""
     COMMENT_HEADER = "Linter Errors:"
 
     def __init__(self, github):
         super(GithubCommentWriter, self).__init__(github)
-        self.file_line_code = {}
-        self.file_line_messages = {}
+        self.violations = {}
         self.candidates = set()
         self._add_candidate_lines()
 
@@ -83,27 +92,47 @@ class GithubCommentWriter(GithubWriter):
         if code not in self.candidates:
             return
 
-        file_line_key = '%s:%s' % (path, line)
+        file_violations = self.violations.get(path, [])
+        file_violations.append(Violation(path, "", int(line), code, message))
+        self.violations[path] = file_violations
 
-        self.file_line_code[file_line_key] = code
-        messages = self.file_line_messages.get(file_line_key, [])
-        messages.append(message)
-        self.file_line_messages[file_line_key] = messages
+    def _get_comment_body(self):
+        """Formats a comment body."""
+        body = self.COMMENT_HEADER + '\n'
+
+        if len(self.violations) == 0:
+            body += "No Errors\n"
+
+        for filename, file_violations in self.violations.iteritems():
+            body += 'In %s:\n' % filename
+
+            unique_lines = set([v.line for v in file_violations])
+
+            # Group violations by line of code
+            line_violations = {line: [v for v in file_violations
+                                        if v.line == line]
+                               for line in unique_lines}
+
+            # We want the messages in order so sort them as ints
+            # because '11' < '2' in string comparison
+            for line in sorted(line_violations.keys()):
+                violations = line_violations[line]
+
+                # we will always have at least one violation
+                violation = violations[0]
+                body += '[%d:](%s) ```%s```\n' % (line, violation.url,
+                                                violation.code)
+
+                for violation in violations:
+                    body += ' - [ ] %s\n' % violation.message
+
+                body += '\n'
+
+        return body
 
     def flush(self):
         """Creates a github comment with the errors found in the file"""
-        body = self.COMMENT_HEADER + '\n'
-
-        ## Have keys sorted so the comments are in the correct order
-        for file_line in sorted(self.file_line_messages.keys()):
-            body += 'In %s:\n' % file_line
-            body += '```python\n%s\n```\n' % self.file_line_code[file_line]
-
-            for message in self.file_line_messages[file_line]:
-                body += '  * %s\n' % message
-
-            body += '\n'
-
+        body = self._get_comment_body()
         self.github.create_or_update_comment(self.COMMENT_HEADER, body)
 
 def review_pull_request(repository, pull_request, pylintrc,
