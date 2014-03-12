@@ -139,8 +139,11 @@ class GithubCommentWriter(GithubWriter):
 
                 # we will always have at least one violation
                 violation = violations[0]
-                body += '[%d:](%s) ```%s```\n' % (line, violation.url,
-                                                violation.code)
+
+                # add a trailing space for the cases when the line is
+                # empty and the comment results in ``````.
+                code = violation.code + " "
+                body += '[%d:](%s) ```%s```\n' % (line, violation.url, code)
 
                 for violation in violations:
                     body += ' - [ ] %s\n' % violation.message
