@@ -73,8 +73,10 @@ class GithubCommentWriter(GithubWriter):
     def __init__(self, github):
         super(GithubCommentWriter, self).__init__(github)
         self.violations = {}
+        self.file_urls = {}
         self.candidates = set()
         self._add_candidate_lines()
+        self._add_file_urls()
 
     def _add_candidate_lines(self):
         """Creates a cache with the code lines that are candidates for
@@ -83,6 +85,16 @@ class GithubCommentWriter(GithubWriter):
             for line in f.patch.splitlines():
                 line = line.lstrip('+')
                 self.candidates.add(line)
+
+    def _add_file_urls(self):
+        for changed_file in self.github.get_files():
+            self.file_urls[changed_file.filename] = changed_file.blob_url
+
+    def _get_file_url(self, path, line=None):
+        if line:
+            return '%s#L%s' % (self.file_urls[path], line)
+        else:
+            return self.file_urls[path]
 
     def handle_pylint_error(self, path, line, code, message):
         """Appends errors to local structures"""
@@ -93,7 +105,10 @@ class GithubCommentWriter(GithubWriter):
             return
 
         file_violations = self.violations.get(path, [])
-        file_violations.append(Violation(path, "", int(line), code, message))
+
+        url = self._get_file_url(path, line)
+
+        file_violations.append(Violation(path, url, int(line), code, message))
         self.violations[path] = file_violations
 
     def _get_comment_body(self):
