@@ -87,10 +87,14 @@ class GithubCommentWriter(GithubWriter):
                 self.candidates.add(line)
 
     def _add_file_urls(self):
+        """Populate file_urls member with Pull Request version url for
+        the changed files"""
         for changed_file in self.github.get_files():
             self.file_urls[changed_file.filename] = changed_file.blob_url
 
     def _get_file_url(self, path, line=None):
+        """Returns the github url for the file at path at the Pull Request
+        version"""
         if line:
             return '%s#L%s' % (self.file_urls[path], line)
         else:
