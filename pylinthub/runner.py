@@ -141,7 +141,7 @@ def review_pull_request(repository, pull_request, pylintrc,
     errors given by pylint"""
     github = GithubPullReviewClient(repository, pull_request, **credentials)
 
-    files = github.get_changed_files()
+    files = [f.filename for f in github.get_files()]
     files = [f for f in files if f.endswith(".py")]
 
     handler = GithubInlineWriter(github) if inline else GithubCommentWriter(github)

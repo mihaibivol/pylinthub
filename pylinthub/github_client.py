@@ -61,18 +61,8 @@ class GithubPullReviewClient(object):
 
     def get_files(self):
         """Returns the files from the current Pull Request"""
-        return [f for f in self.pull_request.get_files()]
-
-    def get_changed_files(self):
-        """Returns the files added or chaned in the pull request"""
-        filenames = set()
-        for commit in self.pull_request.get_commits():
-            files = commit.files
-            changed = [f.filename for f in files if f.status != 'removed']
-            removed = [f.filename for f in files if f.status == 'removed']
-            filenames = filenames.union(changed).difference(removed)
-
-        return list(filenames)
+        return [f for f in self.pull_request.get_files()
+                  if f.status != 'removed']
 
     def get_review_comments(self, code_context, filename):
         """Get the review comments that match the given code context
