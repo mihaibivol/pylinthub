@@ -8,7 +8,7 @@ from pylint.reporters.text import TextReporter
 from pylinthub.github_client import GithubPullReviewClient
 
 PYLINT_ARGS = ["-r", "n",
-               "--msg-template='{path}:{line}:{msg}'"]
+               "--msg-template='{path}#&#&{line}#&#&{msg}'"]
 
 class GithubWriter(object):
     """Abstract class used for adding side effects when parsing pylint
@@ -29,7 +29,7 @@ class GithubWriter(object):
         if string == "" or string.startswith("****"):
             return
 
-        path, line, message = string.split(":")
+        path, line, message = string.split("#&#&")
         code = linecache.getline(path, int(line)).strip()
         self.handle_pylint_error(path, line, code, message)
 
