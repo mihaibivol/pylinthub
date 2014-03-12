@@ -81,8 +81,11 @@ class GithubCommentWriter(GithubWriter):
     def _add_candidate_lines(self):
         """Creates a cache with the code lines that are candidates for
         errors in the pull request."""
-        for f in self.github.get_files():
-            for line in f.patch.splitlines():
+        for changed_file in self.github.get_files():
+            # Some patches are empty (eg adding __init__.py)
+            if not changed_file.patch:
+                continue
+            for line in changed_file.patch.splitlines():
                 line = line.lstrip('+')
                 self.candidates.add(line)
 
