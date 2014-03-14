@@ -180,6 +180,9 @@ def review_pull_request(repository, pull_request, pylintrc,
         # Do not append to the existing constant
         args = args + ["--rcfile %s" % pylintrc]
 
-    lint.Run(PYLINT_ARGS + files, reporter=TextReporter(handler), exit=False)
+    print "####"
+    print args + files
+    print "####"
+    lint.Run(args + files, reporter=TextReporter(handler), exit=False)
     handler.flush()
 
