@@ -168,6 +168,7 @@ def review_pull_request(repository, pull_request, pylintrc,
     """Creates inline comments on the given pull request with the
     errors given by pylint"""
     github = GithubPullReviewClient(repository, pull_request, **credentials)
+    import pdb; pdb.set_trace()
 
     files = [f.filename for f in github.get_files()]
     files = [f for f in files if f.endswith(".py")]
