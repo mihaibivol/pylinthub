@@ -69,6 +69,8 @@ class Violation(object):
 class GithubCommentWriter(GithubWriter):
     """Edits a static comment in the GitHub Pull Request"""
     COMMENT_HEADER = "Linter Errors:"
+    USAGE = ("To check before the commit, run on your build environment: "
+             "```pylint -r -n --rcfile $RCFILE $FILE```\n")
 
     def __init__(self, github):
         super(GithubCommentWriter, self).__init__(github)
@@ -122,6 +124,7 @@ class GithubCommentWriter(GithubWriter):
         """Formats a comment body."""
         body = self.COMMENT_HEADER + '\n'
 
+        body += self.USAGE
         if len(self.violations) == 0:
             body += "No Errors\n"
 
