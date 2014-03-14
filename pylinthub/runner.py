@@ -157,7 +157,7 @@ class GithubCommentWriter(GithubWriter):
 
         body += self.USAGE
 
-        body += "HEAD is %s\n" % self.github.pull_request.head.sha
+        body += "Last commit is %s\n" % self.github.pull_request.head.sha
         return body
 
     def flush(self):
