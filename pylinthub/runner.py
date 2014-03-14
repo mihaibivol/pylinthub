@@ -124,7 +124,6 @@ class GithubCommentWriter(GithubWriter):
         """Formats a comment body."""
         body = self.COMMENT_HEADER + '\n'
 
-        body += self.USAGE
         if len(self.violations) == 0:
             body += "No Errors\n"
 
@@ -156,6 +155,7 @@ class GithubCommentWriter(GithubWriter):
 
                 body += '\n'
 
+        body += self.USAGE
         return body
 
     def flush(self):
