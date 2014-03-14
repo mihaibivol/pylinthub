@@ -51,9 +51,11 @@ class GithubPullReviewClient(object):
         :param comment_header: header to match for the edited comment
         :param body: body of the new comment
         """
+        author_login = self.github.get_user().login
 
         for comment in self.pull_request.get_issue_comments():
-            if comment.body.startswith(comment_header):
+            if (comment.body.startswith(comment_header) and
+                author_login == comment.user.login):
                 comment.edit(body)
                 break
         else:
