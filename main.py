@@ -9,6 +9,7 @@ USAGE = "%s repo pull_request_number [pylint_rc_file]"
 def main():
     """Reviews a pull request with the given system arguments"""
     if 1:
+        # break it   
         return
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print USAGE % sys.argv[0]
