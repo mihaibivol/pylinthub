@@ -30,7 +30,7 @@ class GithubWriter(object):
             return
 
         path, line, message = string.split("#&#&")
-        code = linecache.getline(path, int(line))
+        code = linecache.getline(path, int(line)).rstrip('\r\n')
         self.handle_pylint_error(path, line, code, message)
 
     def flush(self):
