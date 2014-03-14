@@ -69,7 +69,7 @@ class Violation(object):
 class GithubCommentWriter(GithubWriter):
     """Edits a static comment in the GitHub Pull Request"""
     COMMENT_HEADER = "Linter Errors:"
-    USAGE = ("To check before the commit, run on your build environment: "
+    USAGE = ("To check before pushing, run on your build environment: "
              "```pylint -r -n --rcfile $RCFILE $FILE```\n")
 
     def __init__(self, github):
