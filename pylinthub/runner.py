@@ -88,6 +88,9 @@ class GithubCommentWriter(GithubWriter):
             if not changed_file.patch:
                 continue
             for line in changed_file.patch.splitlines():
+                # Comment only on additions
+                if not line.startswith('+'):
+                    continue
                 line = line.lstrip('+')
                 self.candidates.add(line)
 
