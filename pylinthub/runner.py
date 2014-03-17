@@ -88,6 +88,9 @@ class GithubCommentWriter(GithubWriter):
             if not changed_file.patch:
                 continue
             for line in changed_file.patch.splitlines():
+                # Comment only on additions
+                if not line.startswith('+'):
+                    continue
                 line = line.lstrip('+')
                 self.candidates.add(line)
 
@@ -125,7 +128,7 @@ class GithubCommentWriter(GithubWriter):
         body = self.COMMENT_HEADER + '\n'
 
         if len(self.violations) == 0:
-            body += "No Errors\n"
+            body += "No Errors! Congrats!\n"
 
         for filename, file_violations in self.violations.iteritems():
             body += 'In %s:\n' % filename
@@ -154,6 +157,12 @@ class GithubCommentWriter(GithubWriter):
                     body += ' - [ ] %s\n' % violation.message
 
                 body += '\n'
+
+        if len(self.violations):
+            violation_count = sum([len(v) for v in self.violations.values()])
+            total_loc = len(self.candidates)
+            body += 'Having __%d__ violations with __%.2f__ violations/line\n' % (
+                    violation_count, float(violation_count) / total_loc)
 
         body += self.USAGE
 
