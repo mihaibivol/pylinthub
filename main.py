@@ -30,6 +30,15 @@ def get_arguments():
             type = str,
             help = 'Pylint rc file')
 
+    arg_parser.add_argument('-a', '--assignees',
+            nargs = '+',
+            required = False,
+            type = str,
+            help = ('Pull Request assignees for which the script is ran. '
+                    'If not set the script will run for any assignee'))
+
+
+
     return arg_parser.parse_args(sys.argv[1:])
 
 def main():
@@ -39,8 +48,9 @@ def main():
     pull_number = args['pull_number'][0]
     repo = args['repo'][0]
     pylintrc = args['rcfile'][0] if args['rcfile'] else None
+    assignees = args['assignees']
 
-    review_pull_request(repo, pull_number, pylintrc, **credentials)
+    review_pull_request(repo, pull_number, pylintrc, assignees, **credentials)
 
 if __name__ == "__main__":
     main()
