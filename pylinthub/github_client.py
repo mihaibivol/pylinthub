@@ -66,6 +66,12 @@ class GithubPullReviewClient(object):
         return [f for f in self.pull_request.get_files()
                   if f.status != 'removed']
 
+    def get_assignee_name(self):
+        """Returns the name of the Pull Request assignee"""
+        if self.pull_request.assignee:
+            return self.pull_request.assignee.login
+        return None
+
     def get_review_comments(self, code_context, filename):
         """Get the review comments that match the given code context
         :param code_context: string

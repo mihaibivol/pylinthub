@@ -165,11 +165,14 @@ class GithubCommentWriter(GithubWriter):
         body = self._get_comment_body()
         self.github.create_or_update_comment(self.COMMENT_HEADER, body)
 
-def review_pull_request(repository, pull_request, pylintrc,
+def review_pull_request(repository, pull_request, pylintrc, assignees=None,
                         inline=False, **credentials):
     """Creates inline comments on the given pull request with the
     errors given by pylint"""
     github = GithubPullReviewClient(repository, pull_request, **credentials)
+
+    if assignees and github.get_assignee_name() not in assignees:
+        return
 
     files = [f.filename for f in github.get_files()]
     files = [f for f in files if f.endswith(".py")]
