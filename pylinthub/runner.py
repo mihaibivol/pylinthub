@@ -70,7 +70,7 @@ class GithubCommentWriter(GithubWriter):
     """Edits a static comment in the GitHub Pull Request"""
     COMMENT_HEADER = "Linter Errors:"
     USAGE = ("To check before pushing, run on your build environment: "
-             "```pylint -r -n --rcfile $RCFILE $FILE```\n")
+             "```pylint -r -n --rcfile=$RCFILE $FILE```\n")
 
     def __init__(self, github):
         super(GithubCommentWriter, self).__init__(github)
@@ -192,7 +192,7 @@ def review_pull_request(repository, pull_request, pylintrc, assignees=None,
 
     if pylintrc is not None:
         # Do not append to the existing constant
-        args = args + ["--rcfile %s" % pylintrc]
+        args = args + ["--rcfile=%s" % pylintrc]
 
     if not files:
         return
